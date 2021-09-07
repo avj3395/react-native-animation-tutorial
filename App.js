@@ -1,112 +1,98 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
-
-import React from 'react';
-import type {Node} from 'react';
+import React, {useRef, useEffect, useState} from 'react';
 import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
-  useColorScheme,
   View,
+  Image,
+  FlatList,
+  Dimensions,
+  Animated,
 } from 'react-native';
+import animalImg from './Constants/ConstData';
+const {width, height} = Dimensions.get('screen');
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+const ITEM_WIDTH = width * 0.76;
+const ITEM_HEIGHT = ITEM_WIDTH * 1.47;
 
-const Section = ({children, title}): Node => {
-  const isDarkMode = useColorScheme() === 'dark';
+const App = () => {
+  const scrollX = useRef(new Animated.Value(0)).current;
+
   return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
+    <View style={styles.container}>
+      <Animated.FlatList
+        data={animalImg}
+        keyExtractor={(item, index) => {
+          index.toString;
+        }}
+        onScroll={Animated.event(
+          [{nativeEvent: {contentOffset: {x: scrollX}}}],
+          {useNativeDriver: true},
+        )}
+        renderItem={({item, index}) => {
+          const inputRange = [
+            (index - 1) * width,
+            index * width,
+            (index + 1) * width,
+          ];
+
+          const translateX = scrollX.interpolate({
+            inputRange,
+            outputRange: [-width * 0.7, 0, width * 0.7],
+          });
+
+          return (
+            <View
+              style={{justifyContent: 'center', width, alignItems: 'center'}}>
+              <View
+                style={{
+                  borderRadius: 18,
+                  borderWidth: 10,
+                  shadowColor: '#000',
+                  shadowOpacity: 0.5,
+                  shadowRadius: 20,
+                  shadowOffset: {
+                    width: 0,
+                    height: 0,
+                  },
+                  padding: 12,
+                  backgroundColor: 'white',
+                }}>
+                <View
+                  style={{
+                    width: ITEM_WIDTH,
+                    height: ITEM_HEIGHT,
+                    overflow: 'hidden',
+                    alignItems: 'center',
+                    borderRadius: 14,
+                  }}>
+                  <Animated.Image
+                    source={{uri: item.url}}
+                    style={{
+                      width: ITEM_WIDTH,
+                      height: ITEM_HEIGHT,
+                      resizeMode: 'cover',
+                      transform: [{translateX}],
+                    }}
+                  />
+                </View>
+              </View>
+            </View>
+          );
+        }}
+        keyExtractor={(item, index) => `${index}`}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+      />
     </View>
   );
 };
 
-const App: () => Node = () => {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.js</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-};
+export default App;
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
+  container: {
+    flex: 1,
+    // backgroundColor: 'green',
   },
 });
-
-export default App;
